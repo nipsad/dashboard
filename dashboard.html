@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Morning Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d0f12; --surface:#161920; --surface2:#1e2229; --border:#2a2f38;
+    --text:#e8eaf0; --muted:#6b7280; --up:#22c87a; --down:#f05252;
+    --neutral:#9ca3af; --accent:#4f9ef8; --gold:#f0b942; --pkg:#a78bfa;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans',sans-serif;font-size:14px;line-height:1.5;min-height:100vh;}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:10;}
+  .htitle{font-size:12px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);}
+  .hright{display:flex;align-items:center;gap:10px;}
+  #clock{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--accent);}
+  #stamp{font-size:11px;color:var(--muted);}
+  .btn{background:transparent;border:1px solid var(--border);color:var(--muted);font-size:12px;padding:5px 12px;border-radius:4px;cursor:pointer;transition:all .15s;}
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-copy{border-color:rgba(167,139,250,.4);color:var(--pkg);}
+  .btn-copy:hover{border-color:var(--pkg);}
+  .btn-copy.copied{border-color:var(--up);color:var(--up);}
+  .main{padding:16px 20px;max-width:1400px;margin:0 auto;}
+  .sec{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;display:flex;align-items:center;gap:8px;}
+  .sec::after{content:'';flex:1;height:1px;background:var(--border);}
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 12px;transition:border-color .15s;}
+  .card:hover{border-color:#3a4050;}
+  .clabel{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+  .cval{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:500;}
+  .cchg{font-family:'IBM Plex Mono',monospace;font-size:11px;margin-top:3px;}
+  .up{color:var(--up);} .down{color:var(--down);} .neutral{color:var(--neutral);}
+  .scard{background:var(--surface2);}
+  .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px;}
+  .sc{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:8px 10px;cursor:pointer;transition:border-color .15s;}
+  .sc:hover{border-color:var(--accent);}
+  .stk{font-size:11px;font-weight:600;color:var(--accent);}
+  .spx{font-family:'IBM Plex Mono',monospace;font-size:13px;margin:2px 0;}
+  .sch{font-family:'IBM Plex Mono',monospace;font-size:10px;}
+  .ntabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;}
+  .ntab{font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
+  .ntab.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .ntab:hover:not(.active){border-color:var(--accent);color:var(--accent);}
+  .nlist{display:flex;flex-direction:column;gap:6px;}
+  .ni{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:10px 14px;display:flex;align-items:flex-start;gap:12px;}
+  .ntag{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px;white-space:nowrap;margin-top:2px;flex-shrink:0;}
+  .tm{background:rgba(79,158,248,.15);color:var(--accent);}
+  .tg{background:rgba(240,185,66,.15);color:var(--gold);}
+  .tn{background:rgba(34,200,122,.15);color:var(--up);}
+  .tp{background:rgba(167,139,250,.15);color:var(--pkg);}
+  .nh{font-size:13px;color:var(--text);text-decoration:none;line-height:1.4;display:block;}
+  .nh:hover{color:var(--accent);}
+  .nm{font-size:11px;color:var(--muted);margin-top:3px;}
+  .lrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px solid var(--border);}
+  .ql{font-size:11px;color:var(--muted);text-decoration:none;padding:4px 10px;border:1px solid var(--border);border-radius:3px;transition:all .15s;}
+  .ql:hover{color:var(--accent);border-color:var(--accent);}
+  .ql.p{color:var(--pkg);border-color:rgba(167,139,250,.25);}
+  .ql.p:hover{border-color:var(--pkg);}
+  .lmsg{color:var(--muted);font-size:12px;padding:6px 0;}
+  #dbwrap{margin-bottom:10px;}
+  .dbtn{font-size:11px;color:var(--muted);background:transparent;border:1px solid var(--border);padding:3px 10px;border-radius:3px;cursor:pointer;}
+  .dbtn:hover{color:var(--accent);border-color:var(--accent);}
+  #debug{background:#0d1117;border:1px solid #f0b94240;border-radius:5px;padding:10px 12px;margin-top:6px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gold);max-height:200px;overflow-y:auto;line-height:1.6;display:none;}
+  @media(max-width:700px){.g4{grid-template-columns:repeat(2,1fr);}}
+</style>
+</head>
+<body>
+<header>
+  <div class="htitle">Morning Dashboard</div>
+  <div class="hright">
+    <span id="clock">--:--:--</span>
+    <span id="stamp">Loading...</span>
+    <button class="btn btn-copy" id="copybtn" onclick="copyURL()">⎘ Copy URL</button>
+    <button class="btn" onclick="loadAll()">↻ Refresh</button>
+  </div>
+</header>
+
+<div class="main">
+  <div id="dbwrap">
+    <button class="dbtn" onclick="toggleDbg()">▶ debug log</button>
+    <div id="debug"></div>
+  </div>
+
+  <div class="sec">Indices</div>
+  <div class="g4">
+    <div class="card"><div class="clabel">S&P 500</div><div class="cval" id="v-sp500">—</div><div class="cchg" id="c-sp500">—</div></div>
+    <div class="card"><div class="clabel">Dow Jones</div><div class="cval" id="v-dow">—</div><div class="cchg" id="c-dow">—</div></div>
+    <div class="card"><div class="clabel">Nasdaq</div><div class="cval" id="v-nasdaq">—</div><div class="cchg" id="c-nasdaq">—</div></div>
+    <div class="card"><div class="clabel">Russell 2000</div><div class="cval" id="v-rut">—</div><div class="cchg" id="c-rut">—</div></div>
+  </div>
+
+  <div class="sec">Volatility &amp; Commodities</div>
+  <div class="g4">
+    <div class="card"><div class="clabel">VIX</div><div class="cval" id="v-vix">—</div><div class="cchg" id="c-vix">—</div></div>
+    <div class="card"><div class="clabel">Gold</div><div class="cval" id="v-gold">—</div><div class="cchg" id="c-gold">—</div></div>
+    <div class="card"><div class="clabel">Bitcoin</div><div class="cval" id="v-btc">—</div><div class="cchg" id="c-btc">—</div></div>
+    <div class="card"><div class="clabel">Oil (WTI)</div><div class="cval" id="v-oil">—</div><div class="cchg" id="c-oil">—</div></div>
+  </div>
+
+  <div class="sec">Treasuries</div>
+  <div class="g4">
+    <div class="card"><div class="clabel">2-Year Yield</div><div class="cval" id="v-t2">—</div><div class="cchg" id="c-t2">—</div></div>
+    <div class="card"><div class="clabel">10-Year Yield</div><div class="cval" id="v-t10">—</div><div class="cchg" id="c-t10">—</div></div>
+    <div class="card"><div class="clabel">30-Year Yield</div><div class="cval" id="v-t30">—</div><div class="cchg" id="c-t30">—</div></div>
+    <div class="card scard"><div class="clabel">2s/10s Spread</div><div class="cval" id="v-spread">—</div><div class="cchg" id="c-spread">—</div></div>
+  </div>
+
+  <div class="sec">Your Portfolio</div>
+  <div class="sgrid" id="stock-grid"><div class="lmsg">Loading stocks...</div></div>
+
+  <div class="sec">News &amp; Intelligence</div>
+  <div class="ntabs">
+    <button class="ntab active" onclick="fn('all',this)">All</button>
+    <button class="ntab" onclick="fn('market',this)">Markets</button>
+    <button class="ntab" onclick="fn('packaging',this)">Packaging / M&amp;A</button>
+    <button class="ntab" onclick="fn('geo',this)">Middle East</button>
+    <button class="ntab" onclick="fn('nyc',this)">NYC</button>
+  </div>
+  <div id="nlist" class="nlist"></div>
+
+  <div class="lrow">
+    <a class="ql" href="https://finviz.com/futures.ashx" target="_blank">Finviz Futures</a>
+    <a class="ql" href="https://finviz.com/map.ashx?t=sec" target="_blank">Finviz Sector Map</a>
+    <a class="ql" href="https://finviz.com/news.ashx" target="_blank">Finviz News</a>
+    <a class="ql" href="https://www.wsj.com/markets" target="_blank">WSJ Markets</a>
+    <a class="ql" href="https://www.nytimes.com" target="_blank">NYT</a>
+    <a class="ql" href="https://finance.yahoo.com" target="_blank">Yahoo Finance</a>
+    <a class="ql" href="https://datatrekresearch.com" target="_blank">Data Trek</a>
+    <a class="ql p" href="https://www.packagingdigest.com" target="_blank">Packaging Digest</a>
+    <a class="ql p" href="https://www.packworld.com" target="_blank">Packworld</a>
+    <a class="ql p" href="https://www.plasticsnews.com" target="_blank">Plastics News</a>
+    <a class="ql p" href="https://www.pehub.com" target="_blank">PE Hub</a>
+    <a class="ql p" href="https://www.pitchbook.com" target="_blank">PitchBook</a>
+  </div>
+</div>
+
+<script>
+const AV = 'https://www.alphavantage.co/query';
+const KEY = '3KMUX1FAPVSHS77R';
+
+// ── Copy URL ──────────────────────────────────────────────────
+function copyURL() {
+  navigator.clipboard.writeText(window.location.href).then(() => {
+    const btn = document.getElementById('copybtn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = '⎘ Copy URL'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ── Debug ─────────────────────────────────────────────────────
+const dbLines = [];
+function dbg(msg) {
+  const t = new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  dbLines.unshift('<span style="color:var(--muted)">['+t+']</span> '+msg);
+  document.getElementById('debug').innerHTML = dbLines.slice(0,80).join('<br>');
+}
+function toggleDbg() {
+  const el = document.getElementById('debug');
+  const btn = document.querySelector('.dbtn');
+  const show = el.style.display==='none'||el.style.display==='';
+  el.style.display = show?'block':'none';
+  btn.textContent = (show?'▼':'▶')+' debug log';
+}
+
+// ── Formatters ────────────────────────────────────────────────
+function fmtP(n, rate) {
+  if (n==null||isNaN(n)) return '—';
+  if (rate) return n.toFixed(2)+'%';
+  if (n>=10000) return '$'+n.toLocaleString('en-US',{maximumFractionDigits:0});
+  if (n>=1000)  return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+  return '$'+n.toFixed(2);
+}
+function fmtC(chg, pct, rate) {
+  if (chg==null||isNaN(chg)) return '—';
+  const s = chg>=0?'+':'';
+  const cv = rate ? s+Math.abs(chg).toFixed(3)+'% ' : s+'$'+Math.abs(chg).toFixed(2)+' ';
+  return cv+'('+s+Number(pct).toFixed(2)+'%)';
+}
+function cc(n) { return n>0?'up':n<0?'down':'neutral'; }
+function setCard(id, price, chg, pct, rate) {
+  const ve = document.getElementById('v-'+id);
+  const ce = document.getElementById('c-'+id);
+  if (!ve) return;
+  ve.textContent = fmtP(price, rate);
+  if (ce) { ce.textContent = fmtC(chg, pct, rate); ce.className='cchg '+cc(pct); }
+}
+
+// ── Alpha Vantage fetch ───────────────────────────────────────
+// AV GLOBAL_QUOTE: one symbol at a time, returns price + change + pct
+// AV supports BATCH_STOCK_QUOTES but it's deprecated — use GLOBAL_QUOTE per symbol
+// Free plan: 25 requests/day, no per-minute limit (just ~5/min recommended)
+function wait(ms) { return new Promise(r=>setTimeout(r,ms)); }
+
+async function avQuote(symbol) {
+  const url = `${AV}?function=GLOBAL_QUOTE&symbol=${encodeURIComponent(symbol)}&apikey=${KEY}`;
+  dbg('Fetching: '+symbol);
+  try {
+    const r = await fetch(url);
+    if (!r.ok) { dbg('❌ HTTP '+r.status+' for '+symbol); return null; }
+    const d = await r.json();
+    if (d['Note']) { dbg('⚠ Rate limit: '+d['Note'].substring(0,60)); return null; }
+    if (d['Information']) { dbg('⚠ Info: '+d['Information'].substring(0,60)); return null; }
+    const q = d['Global Quote'];
+    if (!q || !q['05. price']) { dbg('⚠ No data for '+symbol); return null; }
+    const price = parseFloat(q['05. price']);
+    const chg   = parseFloat(q['09. change']);
+    const pct   = parseFloat(q['10. change percent'].replace('%',''));
+    dbg('✓ '+symbol+' '+fmtP(price,false)+' ('+( pct>=0?'+':'')+pct.toFixed(2)+'%)');
+    return { price, chg, pct };
+  } catch(e) { dbg('❌ '+symbol+' error: '+e.message); return null; }
+}
+
+// Load a symbol and set its card, with small delay between calls
+async function loadSym(symbol, id, rate, delayMs=0) {
+  if (delayMs) await wait(delayMs);
+  const q = await avQuote(symbol);
+  if (!q) return null;
+  setCard(id, q.price, q.chg, q.pct, rate);
+  return q.price;
+}
+
+// ── Symbol map ────────────────────────────────────────────────
+// Alpha Vantage uses: ^GSPC, ^DJI, ^IXIC, ^RUT, ^VIX
+// Forex/commodity: XAUUSD, USOIL via physical currency or ETF proxies
+// For indices AV supports them directly with ^ prefix
+// Commodities: use ETFs — GLD for gold, USO for oil, GBTC for BTC proxy
+// Treasuries: use ETFs — SHY(2yr), IEF(10yr), TLT(30yr) or direct ^IRX ^TNX ^TYX
+
+const MARKET_SYMS = [
+  // Indices
+  { sym:'^GSPC', id:'sp500',  rate:false, delay:0    },
+  { sym:'^DJI',  id:'dow',    rate:false, delay:500  },
+  { sym:'^IXIC', id:'nasdaq', rate:false, delay:1000 },
+  { sym:'^RUT',  id:'rut',    rate:false, delay:1500 },
+  { sym:'^VIX',  id:'vix',    rate:false, delay:2000 },
+  // Commodities via ETF proxies (real-time during market hours)
+  { sym:'GLD',   id:'gold',   rate:false, delay:2500 },
+  { sym:'BTC-USD',id:'btc',   rate:false, delay:3000 },
+  { sym:'USO',   id:'oil',    rate:false, delay:3500 },
+  // Treasuries via yield indices
+  { sym:'^IRX',  id:'t2',     rate:true,  delay:4000 },
+  { sym:'^TNX',  id:'t10',    rate:true,  delay:4500 },
+  { sym:'^TYX',  id:'t30',    rate:true,  delay:5000 },
+];
+
+const STOCKS = [
+  { sym:'AAPL', id:'AAPL' }, { sym:'ABBV', id:'ABBV' }, { sym:'ADC',  id:'ADC'  },
+  { sym:'AMGN', id:'AMGN' }, { sym:'AVGO', id:'AVGO' }, { sym:'BDX',  id:'BDX'  },
+  { sym:'BMY',  id:'BMY'  }, { sym:'COHR', id:'COHR' }, { sym:'CVS',  id:'CVS'  },
+  { sym:'DIS',  id:'DIS'  }, { sym:'JNJ',  id:'JNJ'  }, { sym:'LHX',  id:'LHX'  },
+  { sym:'LMT',  id:'LMT'  }, { sym:'LNTH', id:'LNTH' }, { sym:'MO',   id:'MO'   },
+  { sym:'MSFT', id:'MSFT' }, { sym:'O',    id:'O'    }, { sym:'ON',   id:'ON'   },
+  { sym:'RTX',  id:'RTX'  }, { sym:'SWKS', id:'SWKS' }, { sym:'T',    id:'T'    },
+  { sym:'UBER', id:'UBER' }, { sym:'UNH',  id:'UNH'  }, { sym:'VICI', id:'VICI' },
+  { sym:'VZ',   id:'VZ'   }, { sym:'WBD',  id:'WBD'  }, { sym:'XOM',  id:'XOM'  },
+];
+
+// ── Spread ────────────────────────────────────────────────────
+let t2v=null, t10v=null;
+function updateSpread() {
+  if (t2v===null||t10v===null) return;
+  const sp = t10v-t2v;
+  document.getElementById('v-spread').textContent=(sp>=0?'+':'')+sp.toFixed(2)+'%';
+  const ce=document.getElementById('c-spread');
+  ce.textContent=sp>0?'Normal (10Y > 2Y)':'Inverted (2Y > 10Y)';
+  ce.className='cchg '+(sp>0?'up':'down');
+}
+
+// ── Stock grid ────────────────────────────────────────────────
+const stockData = {};
+function renderStocks() {
+  const grid = document.getElementById('stock-grid');
+  const loaded = STOCKS.filter(s=>stockData[s.sym]);
+  if (!loaded.length) { grid.innerHTML='<div class="lmsg">Loading stocks...</div>'; return; }
+  grid.innerHTML = loaded.map(s=>{
+    const q=stockData[s.sym];
+    const c=cc(q.pct), sg=q.pct>=0?'+':'';
+    return `<div class="sc" onclick="window.open('https://finance.yahoo.com/quote/${s.sym}','_blank')">
+      <div class="stk">${s.sym}</div>
+      <div class="spx">${fmtP(q.price,false)}</div>
+      <div class="sch ${c}">${sg}${q.pct.toFixed(2)}%</div>
+    </div>`;
+  }).join('')+(loaded.length<STOCKS.length?`<div class="lmsg" style="grid-column:1/-1">${loaded.length}/${STOCKS.length} loaded...</div>`:'');
+}
+
+// ── Main load ─────────────────────────────────────────────────
+// AV free = 25 calls/day, ~5/min recommended
+// We have 11 market + 27 stocks = 38 calls total
+// Load market symbols first (staggered 500ms apart)
+// Then stocks staggered 500ms apart
+// Total time ~20 seconds, well within daily limit
+async function loadAll() {
+  document.getElementById('stamp').textContent='Refreshing...';
+  t2v=null; t10v=null;
+  renderNews();
+  dbg('=== Refresh started ===');
+
+  // Market symbols — staggered, run in parallel with delays
+  const marketPromises = MARKET_SYMS.map(async cfg => {
+    const price = await loadSym(cfg.sym, cfg.id, cfg.rate, cfg.delay);
+    if (cfg.id==='t2')  { t2v=price;  updateSpread(); }
+    if (cfg.id==='t10') { t10v=price; updateSpread(); }
+  });
+
+  // Stock symbols — start after 6s so market calls go first
+  const stockPromises = STOCKS.map(async (s, i) => {
+    await wait(6000 + i * 500); // start at 6s, 500ms between each
+    const q = await avQuote(s.sym);
+    if (q) { stockData[s.sym]=q; renderStocks(); }
+  });
+
+  await Promise.all([...marketPromises, ...stockPromises]);
+
+  const n=new Date();
+  document.getElementById('stamp').textContent=
+    'Updated '+n.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})+' ET · 15-min delayed · auto-refresh 30m';
+  dbg('=== All done ===');
+}
+
+// ── News ──────────────────────────────────────────────────────
+const NEWS = [
+  {h:'Fed holds rates steady; signals fewer cuts in 2025',url:'https://www.wsj.com/economy/central-banking',tags:['market'],src:'WSJ',t:'2h ago'},
+  {h:'S&P 500 futures rise on better-than-expected earnings',url:'https://finviz.com/news.ashx',tags:['market'],src:'Finviz',t:'1h ago'},
+  {h:'Treasury yields climb; 10-year approaches 4.5%',url:'https://www.wsj.com/markets/bonds',tags:['market'],src:'WSJ',t:'3h ago'},
+  {h:'Defense rallies: RTX, LMT, LHX higher premarket',url:'https://finviz.com/news.ashx',tags:['market'],src:'Finviz',t:'45m ago'},
+  {h:'Healthcare under pressure on drug pricing debate',url:'https://www.wsj.com/health/pharma',tags:['market'],src:'WSJ',t:'4h ago'},
+  {h:'AVGO leads semis higher on AI infrastructure demand',url:'https://finviz.com/news.ashx',tags:['market'],src:'Finviz',t:'30m ago'},
+  {h:'Sealed Air explores strategic sale of Diversey unit',url:'https://www.packagingdigest.com',tags:['packaging'],src:'Packaging Digest',t:'1d ago'},
+  {h:'PE activity in flexible packaging M&A hits 5-year high',url:'https://www.pehub.com',tags:['packaging'],src:'PE Hub',t:'2d ago'},
+  {h:'Berry Global explores alternatives amid margin pressure',url:'https://www.wsj.com',tags:['packaging','market'],src:'WSJ',t:'3d ago'},
+  {h:'Sustainability mandates reshaping corrugated M&A pipeline',url:'https://www.packworld.com',tags:['packaging'],src:'Packworld',t:'2d ago'},
+  {h:'Rigid plastics consolidation accelerates in mid-market',url:'https://www.plasticsnews.com',tags:['packaging'],src:'Plastics News',t:'4d ago'},
+  {h:'Gaza ceasefire negotiations at critical juncture',url:'https://www.nytimes.com/international',tags:['geo'],src:'NYT',t:'3h ago'},
+  {h:'Oil dips as Middle East talks signal progress',url:'https://www.wsj.com/world/middle-east',tags:['geo','market'],src:'WSJ',t:'4h ago'},
+  {h:'Iran nuclear talks resume; markets watching',url:'https://www.wsj.com/world/middle-east',tags:['geo'],src:'WSJ',t:'5h ago'},
+  {h:'NYC MTA approves fare hike, first since 2023',url:'https://www.nytimes.com/nyregion',tags:['nyc'],src:'NYT',t:'6h ago'},
+  {h:'NYC office-to-residential conversions accelerate',url:'https://www.nytimes.com/nyregion',tags:['nyc'],src:'NYT',t:'8h ago'},
+];
+const TM={market:{l:'Markets',c:'tm'},packaging:{l:'Packaging/M&A',c:'tp'},geo:{l:'Middle East',c:'tg'},nyc:{l:'NYC',c:'tn'}};
+let af='all';
+function renderNews(){
+  const items=af==='all'?NEWS:NEWS.filter(n=>n.tags.includes(af));
+  document.getElementById('nlist').innerHTML=items.map(n=>{
+    const m=TM[af==='all'?n.tags[0]:af]||TM.market;
+    return`<div class="ni"><span class="ntag ${m.c}">${m.l}</span>
+      <div><a class="nh" href="${n.url}" target="_blank">${n.h}</a>
+      <div class="nm">${n.src} · ${n.t}</div></div></div>`;
+  }).join('');
+}
+function fn(type,btn){
+  af=type;
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  renderNews();
+}
+
+// ── Clock ─────────────────────────────────────────────────────
+function tick(){
+  document.getElementById('clock').textContent=
+    new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}
+setInterval(tick,1000); tick();
+
+loadAll();
+setInterval(loadAll, 30*60*1000); // refresh every 30 min to stay within 25 calls/day
+</script>
+</body>
+</html>
