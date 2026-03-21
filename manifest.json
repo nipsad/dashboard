@@ -1,0 +1,22 @@
+{
+  "name": "Morning Intelligence",
+  "short_name": "Morning Intel",
+  "description": "Personal market, news, weather and stock intelligence dashboard",
+  "start_url": "/dashboard/dashboard.html",
+  "display": "standalone",
+  "background_color": "#0a0c0f",
+  "theme_color": "#0a0c0f",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/0a0c0f/4f9ef8?text=MI",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/0a0c0f/4f9ef8?text=MI",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
